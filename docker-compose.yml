@@ -20,6 +20,7 @@ services:
     volumes:
       - ./backend/report-templates:/app/report-templates
       - ./backend/src/config:/app/src/config
+      - ./cwe_api/ssl/cert.pem:/app/ssl/cwe_api.cert:ro
     depends_on:
       - mongodb
     restart: always
