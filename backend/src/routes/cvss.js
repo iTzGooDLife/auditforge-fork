@@ -1,3 +1,6 @@
+const https = require('https');
+const fs = require('fs');
+
 module.exports = function (app) {
   const Response = require('../lib/httpResponse.js');
   const acl = require('../lib/auth').acl;
@@ -28,9 +31,12 @@ module.exports = function (app) {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
+      const aiAgent = new https.Agent({
+        ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.cert'),
+        rejectUnauthorized: true
+      });
+
       try {
-        //TODO: Change workaround to a proper solution for self-signed certificates
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
         const response = await fetch(
           `https://${cweConfig.host}:${cweConfig.port}/cvss`,
           {
@@ -38,6 +44,7 @@ module.exports = function (app) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(vuln),
             signal: controller.signal,
+            agent: aiAgent,
           },
         );
 
@@ -55,7 +62,6 @@ module.exports = function (app) {
       } finally {
         clearTimeout(timeout);
       }
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
     },
   );
 };
