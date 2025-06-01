@@ -1,10 +1,9 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-
 const LogSchema = new Schema({
   id: {
-    type: Schema.Types.ObjectId,
+    type: String,
     required: true,
     unique: true
   },
@@ -65,6 +64,26 @@ LogSchema.index({ userId: 1, timestamp: -1 });
 LogSchema.index({ endpoint: 1, method: 1 });
 LogSchema.index({ timestamp: -1 });
 
+// Create log
+// TODO: change error message
+LogSchema.statics.create = log => {
+  return new Promise((resolve, reject) => {
+    var query = new Log(log);
+    query
+      .save(log)
+      .then(row => {
+        resolve({ _id: row._id });
+      })
+      .catch(err => {
+        if (err.code === 11000)
+          reject({
+            fn: 'BadParameters',
+            message: 'Error',
+          });
+        else reject(err);
+      });
+  });
+};
 
 var Log = mongoose.model('Log', LogSchema);
 module.exports = Log;
