@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -13,28 +13,30 @@ export const Login = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
 
-  checktoken()
-    .then(result => {
-      if (result) {
-        navigate('/audits', { replace: true });
-      }
-    })
-    .catch(console.error);
+  useEffect(() => {
+    checktoken()
+      .then(result => {
+        if (result) {
+          navigate('/audits', { replace: true });
+        }
+      })
+      .catch(console.error);
+  }, [navigate]);
 
   return (
     <>
       <LoginForm>
         <SimpleInput
-          id="email"
-          label={t('email')}
-          name="email"
-          onChange={setEmail}
-          placeholder={t('email')}
+          id="username"
+          label={t('username')}
+          name="username"
+          onChange={setUsername}
+          placeholder={t('username')}
           requiredField
           type="text"
-          value={email}
+          value={username}
         />
         <SimpleInput
           id="password"
