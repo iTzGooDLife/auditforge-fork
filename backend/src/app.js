@@ -62,6 +62,7 @@ require('./models/custom-section');
 require('./models/custom-field');
 require('./models/image');
 require('./models/settings');
+require('./models/logs');
 
 // Socket IO configuration
 io.on('connection', socket => {
