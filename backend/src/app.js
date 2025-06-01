@@ -28,6 +28,11 @@ var io = require('socket.io')(https, {
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var utils = require('./lib/utils');
+//
+require('./models/logs');
+const { auditTrail } = require('./lib/log');
+app.use(auditTrail.middleware());
+//
 
 // Get configuration
 var env = process.env.NODE_ENV || 'dev';
@@ -62,7 +67,6 @@ require('./models/custom-section');
 require('./models/custom-field');
 require('./models/image');
 require('./models/settings');
-require('./models/logs');
 
 // Socket IO configuration
 io.on('connection', socket => {
