@@ -37,7 +37,6 @@ class AuditTrail {
     };
 
     sanitizeObject(sanitized);
-    console.log("sanitized: ",sanitized);
     return sanitized;
   }
 
@@ -117,9 +116,7 @@ class AuditTrail {
       logData.signature = this.generateSignature(logData);
 
       //TODO: Cambiar acción then & catch
-      Log.create(logData)
-        .then(msg => console.log("Log Creado exitosamente:", msg))
-        .catch(err => console.log("Log con error:", err));
+      Log.create(logData);
 
     } catch (error) {
       console.error('Error in createLog:', error);
@@ -182,7 +179,6 @@ class AuditTrail {
       next();
     };
   }
-
 }
 
 
