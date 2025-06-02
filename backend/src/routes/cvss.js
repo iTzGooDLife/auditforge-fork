@@ -24,44 +24,58 @@ module.exports = function (app) {
         return;
       }
 
-      const vuln = {
-        vuln: req.body.vuln.trim(),
+      const vuln = JSON.stringify({ vuln: req.body.vuln.trim() });
+
+      const options = {
+        hostname: cweConfig.host,
+        port: cweConfig.port,
+        path: '/cvss',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(vuln),
+        },
+        ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.crt'),
+        rejectUnauthorized: true,
+        timeout: TIMEOUT_MS,
       };
 
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+      const reqHttps = https.request(options, (response) => {
+        let data = '';
 
-      const aiAgent = new https.Agent({
-        ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.cert'),
-        rejectUnauthorized: true
+        response.on('data', (chunk) => {
+          data += chunk;
+        });
+
+        response.on('end', () => {
+          if (response.statusCode < 200 || response.statusCode >= 300) {
+            console.error('Bad response code:', response.statusCode);
+            Response.Internal(res, networkError);
+            return;
+          }
+
+          try {
+            const parsed = JSON.parse(data);
+            res.json(parsed);
+          } catch (e) {
+            console.error('Error parsing JSON:', e);
+            Response.Internal(res, errorClassify);
+          }
+        });
       });
 
-      try {
-        const response = await fetch(
-          `https://${cweConfig.host}:${cweConfig.port}/cvss`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(vuln),
-            signal: controller.signal,
-            agent: aiAgent,
-          },
-        );
-
-        if (!response.ok) {
-          throw networkError;
+      reqHttps.on('error', (error) => {
+        console.error('Request error:', error);
+        if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
+          Response.Internal(res, timeoutError);
+        } else {
+          Response.Internal(res, errorClassify);
         }
+      });
 
-        const data = await response.json();
-        res.json(data);
-      } catch (error) {
-        console.error(error);
-        error.name === 'AbortError'
-          ? Response.Internal(res, timeoutError)
-          : Response.Internal(res, errorClassify);
-      } finally {
-        clearTimeout(timeout);
-      }
+      reqHttps.write(vuln);
+      reqHttps.end();
+
     },
   );
 };
