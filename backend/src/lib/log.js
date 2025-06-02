@@ -44,9 +44,10 @@ class AuditTrail {
   generateSignature(logData) {
     const dataToSign = JSON.stringify({
       username: logData.username,
-      userId: logData.userId,
+      role: logData.role,
       endpoint: logData.endpoint,
       method: logData.method,
+      responseStatus: logData.responseStatus,
       timestamp: logData.timestamp,
     });
 
@@ -60,6 +61,22 @@ class AuditTrail {
   verifyLogIntegrity(logData) {
     const expectedSignature = this.generateSignature(logData);
     return logData.signature === expectedSignature;
+  }
+
+
+  getValidSignatureLogs(logs) {
+    return logs.filter(logData => {
+      if (!logData || !logData.signature) {
+        return false;
+      }
+      
+      try {
+        return this.verifyLogIntegrity(logData);
+      } catch (error) {
+        console.error('Error validando firma del log:', error);
+        return false;
+      }
+    });
   }
 
   // Método para extraer información del JWT
