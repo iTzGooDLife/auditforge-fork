@@ -67,7 +67,6 @@ LogSchema.index({ endpoint: 1, method: 1 });
 LogSchema.index({ timestamp: -1 });
 
 // Create log
-// TODO: change error message
 LogSchema.statics.create = log => {
   return new Promise((resolve, reject) => {
     var query = new Log(log);
@@ -80,7 +79,7 @@ LogSchema.statics.create = log => {
         if (err.code === 11000)
           reject({
             fn: 'BadParameters',
-            message: 'Error',
+            message: 'ID already exists',
           });
         else reject(err);
       });
