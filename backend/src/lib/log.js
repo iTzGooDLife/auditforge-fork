@@ -20,12 +20,12 @@ class AuditTrail {
     }
 
     const sanitized = JSON.parse(JSON.stringify(body));
-    
-    const sanitizeObject = (obj) => {
+
+    const sanitizeObject = obj => {
       for (let key in obj) {
         if (obj.hasOwnProperty(key)) {
           const lowerKey = key.toLowerCase();
-          
+
           // Ocultar campos sensibles
           if (this.sensitiveFields.some(field => lowerKey.includes(field))) {
             obj[key] = '[REDACTED]';
@@ -63,13 +63,12 @@ class AuditTrail {
     return logData.signature === expectedSignature;
   }
 
-
   getValidSignatureLogs(logs) {
     return logs.filter(logData => {
       if (!logData || !logData.signature) {
         return false;
       }
-      
+
       try {
         return this.verifyLogIntegrity(logData);
       } catch (error) {
@@ -85,7 +84,7 @@ class AuditTrail {
     let userInfo = {
       id: 'anonymous',
       username: 'anonymous',
-      role: 'guest'
+      role: 'guest',
     };
 
     if (req.cookies && req.cookies['token']) {
@@ -96,7 +95,7 @@ class AuditTrail {
           userInfo = {
             id: decoded.id,
             username: decoded.username,
-            role: decoded.role
+            role: decoded.role,
           };
         }
       } catch (jwtError) {
@@ -107,13 +106,12 @@ class AuditTrail {
     return userInfo;
   }
 
-
   // Crear Log
   async createLog(req, responseStatus) {
     try {
       const userInfo = this.extractUserInfoFromRequest(req);
       const timestamp = new Date();
-      
+
       //TODO: Cambiar ipAddress para que sea IPv4 en lugar de IPv6
       const logData = {
         id: crypto.randomUUID(),
@@ -134,7 +132,6 @@ class AuditTrail {
 
       //TODO: Cambiar acción then & catch
       Log.create(logData);
-
     } catch (error) {
       console.error('Error in createLog:', error);
     }
@@ -143,8 +140,12 @@ class AuditTrail {
   // Método síncrono para usar sin async/await
   // Se filtran los endpoints que no se ven necesarios
   createLogSync(req, responseStatus) {
-    if (req.originalUrl !== '/api/users/checktoken' && req.originalUrl !== '/api/users/refreshtoken'
-    && req.url !== '/api/users/checktoken' && req.originalUrl !== '/api/users/refreshtoken'){
+    if (
+      req.originalUrl !== '/api/users/checktoken' &&
+      req.originalUrl !== '/api/users/refreshtoken' &&
+      req.url !== '/api/users/checktoken' &&
+      req.originalUrl !== '/api/users/refreshtoken'
+    ) {
       setImmediate(async () => {
         await this.createLog(req, responseStatus);
       });
@@ -163,12 +164,12 @@ class AuditTrail {
       Unauthorized: Response.Unauthorized,
       Forbidden: Response.Forbidden,
       NotFound: Response.NotFound,
-      Internal: Response.Internal
+      Internal: Response.Internal,
     };
 
     // Crear wrappers que incluyen auditoría
     const createLogWrapper = (originalMethod, statusCode) => {
-      return function(res, data) {
+      return function (res, data) {
         // Crear log de auditoría si hay información de request disponible
         if (res.req) {
           self.createLogSync(res.req, statusCode);
@@ -181,7 +182,10 @@ class AuditTrail {
     // Aplicar wrappers
     Response.Ok = createLogWrapper(originalMethods.Ok, 200);
     Response.Created = createLogWrapper(originalMethods.Created, 201);
-    Response.BadParameters = createLogWrapper(originalMethods.BadParameters, 400);
+    Response.BadParameters = createLogWrapper(
+      originalMethods.BadParameters,
+      400,
+    );
     Response.Unauthorized = createLogWrapper(originalMethods.Unauthorized, 401);
     Response.Forbidden = createLogWrapper(originalMethods.Forbidden, 403);
     Response.NotFound = createLogWrapper(originalMethods.NotFound, 404);
@@ -197,7 +201,6 @@ class AuditTrail {
     };
   }
 }
-
 
 const auditTrail = new AuditTrail();
 
