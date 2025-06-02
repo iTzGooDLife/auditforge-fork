@@ -31,7 +31,7 @@ module.exports = function (app) {
         path: `/${cweConfig.endpoints.update_cwe_endpoint}`,
         method: 'POST',
         timeout: TIMEOUT_MS,
-        ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.cert'),
+        ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.crt'),
         rejectUnauthorized: true,
       };
 

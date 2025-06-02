@@ -32,7 +32,7 @@ module.exports = function (app) {
           path: `/${cweConfig.endpoints.check_update_endpoint}`,
           method: 'GET',
           timeout: TIMEOUT_MS,
-          ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.cert'),
+          ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.crt'),
           rejectUnauthorized: true,
         };
 
