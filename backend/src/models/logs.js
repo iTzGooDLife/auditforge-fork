@@ -85,5 +85,22 @@ LogSchema.statics.create = log => {
   });
 };
 
+
+LogSchema.statics.getLastHundredLogs = () => {
+  return new Promise((resolve, reject) => {
+    var query = Log.find({}, 'username role endpoint method responseStatus timestamp');
+    query
+      .sort({ timestamp: -1 })
+      .limit(100)
+      .exec()
+      .then(rows => {
+        resolve(rows);
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+};
+
 var Log = mongoose.model('Log', LogSchema);
 module.exports = Log;
