@@ -35,7 +35,7 @@ module.exports = function (app) {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(vuln),
         },
-        ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.cert'),
+        ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.crt'),
         rejectUnauthorized: true,
         timeout: TIMEOUT_MS,
       };
