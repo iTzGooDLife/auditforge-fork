@@ -19,50 +19,53 @@ module.exports = function (app) {
     async function (req, res) {
       const controller = new AbortController();
 
-        if (!cweConfig.host || !cweConfig.port) {
-          return Response.BadRequest(
-            res,
-            new Error('Configuración del servicio incompleta'),
-          );
-        }
+      if (!cweConfig.host || !cweConfig.port) {
+        return Response.BadRequest(
+          res,
+          new Error('Configuración del servicio incompleta'),
+        );
+      }
 
-        const options = {
-          hostname: cweConfig.host,
-          port: cweConfig.port,
-          path: `/${cweConfig.endpoints.check_update_endpoint}`,
-          method: 'GET',
-          timeout: TIMEOUT_MS,
-          ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.crt'),
-          rejectUnauthorized: true,
-        };
+      const options = {
+        hostname: cweConfig.host,
+        port: cweConfig.port,
+        path: `/${cweConfig.endpoints.check_update_endpoint}`,
+        method: 'GET',
+        timeout: TIMEOUT_MS,
+        ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.crt'),
+        rejectUnauthorized: true,
+      };
 
-        const request = https.request(options, (response) => {
-          let data = '';
+      const request = https.request(options, response => {
+        let data = '';
 
-          response.on('data', (chunk) => {
-            data += chunk;
-          });
-
-          response.on('end', () => {
-            if (response.statusCode < 200 || response.statusCode >= 300) {
-              return Response.Internal(res, new Error(`Error del servidor (${response.statusCode}): ${data}`));
-            }
-
-            try {
-              const json = JSON.parse(data);
-              res.json(json);
-            } catch (err) {
-              Response.Internal(res, new Error('Error en check-cwe-update'));
-            }
-          });
+        response.on('data', chunk => {
+          data += chunk;
         });
 
-        request.on('error', (err) => {
-          console.error('Error en check-cwe-update:', err);
-          Response.Internal(res, { ...timeoutError, details: err.message });
-        });
+        response.on('end', () => {
+          if (response.statusCode < 200 || response.statusCode >= 300) {
+            return Response.Internal(
+              res,
+              new Error(`Error del servidor (${response.statusCode}): ${data}`),
+            );
+          }
 
-        request.end();
+          try {
+            const json = JSON.parse(data);
+            res.json(json);
+          } catch (err) {
+            Response.Internal(res, new Error('Error en check-cwe-update'));
+          }
+        });
+      });
+
+      request.on('error', err => {
+        console.error('Error en check-cwe-update:', err);
+        Response.Internal(res, { ...timeoutError, details: err.message });
+      });
+
+      request.end();
     },
   );
 };

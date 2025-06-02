@@ -24,7 +24,7 @@ module.exports = function (app) {
           new Error('Configuración del servicio CWE incompleta'),
         );
       }
-      
+
       const options = {
         hostname: cweConfig.host,
         port: cweConfig.port,
@@ -35,11 +35,10 @@ module.exports = function (app) {
         rejectUnauthorized: true,
       };
 
-
-      const reqHttps = https.request(options, (response) => {
+      const reqHttps = https.request(options, response => {
         let data = '';
 
-        response.on('data', (chunk) => {
+        response.on('data', chunk => {
           data += chunk;
         });
 
@@ -60,7 +59,7 @@ module.exports = function (app) {
         });
       });
 
-      reqHttps.on('error', (error) => {
+      reqHttps.on('error', error => {
         console.error('Request error:', error);
         if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
           Response.Internal(res, timeoutError);
