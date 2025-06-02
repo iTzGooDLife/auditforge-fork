@@ -80,7 +80,7 @@ class AuditTrail {
 
   // Método para extraer información del JWT
   extractUserInfoFromRequest(req) {
-    // Valores default // TODO: revisar si se quita
+    // Valores default
     let userInfo = {
       id: 'anonymous',
       username: 'anonymous',
@@ -112,7 +112,6 @@ class AuditTrail {
       const userInfo = this.extractUserInfoFromRequest(req);
       const timestamp = new Date();
 
-      //TODO: Cambiar ipAddress para que sea IPv4 en lugar de IPv6
       const logData = {
         id: crypto.randomUUID(),
         username: userInfo.username,
@@ -130,7 +129,6 @@ class AuditTrail {
       // Generar firma digital
       logData.signature = this.generateSignature(logData);
 
-      //TODO: Cambiar acción then & catch
       Log.create(logData);
     } catch (error) {
       console.error('Error in createLog:', error);
