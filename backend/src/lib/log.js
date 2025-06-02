@@ -10,7 +10,7 @@ var jwtSecret = config[env].jwtSecret;
 
 class AuditTrail {
   constructor() {
-    this.sensitiveFields = ['password', 'token', 'secret', 'key'];
+    this.sensitiveFields = ['password', 'token', 'secret', 'key', 'totp'];
   }
 
   // Método para sanitizar datos sensibles del cuerpo de la petición
