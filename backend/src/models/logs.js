@@ -85,10 +85,10 @@ LogSchema.statics.create = log => {
   });
 };
 
-
+// Obtener los últimos 100 registros
 LogSchema.statics.getLastHundredLogs = () => {
   return new Promise((resolve, reject) => {
-    var query = Log.find({}, 'username role endpoint method responseStatus timestamp');
+    var query = Log.find({}, 'username role endpoint method responseStatus timestamp signature');
     query
       .sort({ timestamp: -1 })
       .limit(100)
@@ -101,6 +101,54 @@ LogSchema.statics.getLastHundredLogs = () => {
       });
   });
 };
+
+// Obtener reistros con filtros
+LogSchema.statics.getLogsFiltered = (filters, options) => {
+  try {
+    const {
+      username,
+      userId,
+      role,
+      endpoint,
+      method,
+      startDate,
+      endDate,
+      limit = 100,
+      skip = 0,
+      sortBy = 'timestamp',
+      sortOrder = -1
+    } = { ...filters, ...options };
+
+    const query = {};
+
+    if (username) query.username = new RegExp(username, 'i');
+    if (userId) query.userId = userId;
+    if (role) query.role = role;
+    if (endpoint) query.endpoint = new RegExp(endpoint, 'i');
+    if (method) query.method = method;
+    
+    if (startDate || endDate) {
+      query.timestamp = {};
+      if (startDate) query.timestamp.$gte = new Date(startDate);
+      if (endDate) query.timestamp.$lte = new Date(endDate);
+    }
+
+    const sort = {};
+    sort[sortBy] = sortOrder;
+
+    return Log
+      .find(query)
+      .sort(sort)
+      .limit(limit)
+      .skip(skip)
+      .lean();
+
+  } catch (error) {
+    console.error('Error getting audit logs:', error);
+    throw error;
+  }
+}
+
 
 var Log = mongoose.model('Log', LogSchema);
 module.exports = Log;
