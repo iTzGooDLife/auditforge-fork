@@ -88,7 +88,7 @@ LogSchema.statics.create = log => {
 // Obtener los últimos 100 registros
 LogSchema.statics.getLastHundredLogs = () => {
   return new Promise((resolve, reject) => {
-    var query = Log.find({}, 'username role endpoint method responseStatus timestamp signature');
+    var query = Log.find({});
     query
       .sort({ timestamp: -1 })
       .limit(100)
