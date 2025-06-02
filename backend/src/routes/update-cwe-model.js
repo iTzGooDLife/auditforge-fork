@@ -23,7 +23,7 @@ module.exports = function (app) {
             new Error('Configuración del servicio CWE incompleta'),
           );
         }
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
         const response = await fetch(
           `https://${cweConfig.host}:${cweConfig.port}/${cweConfig.endpoints.update_cwe_endpoint}`,
           {
