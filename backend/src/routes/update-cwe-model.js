@@ -1,3 +1,6 @@
+const https = require('https');
+const fs = require('fs');
+
 module.exports = function (app) {
   const Response = require('../lib/httpResponse.js');
   const acl = require('../lib/auth').acl;
@@ -15,37 +18,59 @@ module.exports = function (app) {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-      try {
-        //TODO: Change workaround to a proper solution for self-signed certificates
-        if (!cweConfig.host || !cweConfig.port) {
-          return Response.BadRequest(
-            res,
-            new Error('Configuración del servicio CWE incompleta'),
-          );
-        }
-
-        const response = await fetch(
-          `https://${cweConfig.host}:${cweConfig.port}/${cweConfig.endpoints.update_cwe_endpoint}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            signal: controller.signal,
-          },
+      if (!cweConfig.host || !cweConfig.port) {
+        return Response.BadRequest(
+          res,
+          new Error('Configuración del servicio CWE incompleta'),
         );
-        clearTimeout(timeout);
-
-        if (!response.ok) {
-          throw networkError;
-        }
-
-        const data = await response.json();
-        res.json(data);
-      } catch (error) {
-        console.error(error);
-        error.name === 'AbortError'
-          ? Response.Internal(res, timeoutError)
-          : Response.Internal(res, networkError);
       }
+      
+      const options = {
+        hostname: cweConfig.host,
+        port: cweConfig.port,
+        path: `/${cweConfig.endpoints.update_cwe_endpoint}`,
+        method: 'POST',
+        timeout: TIMEOUT_MS,
+        ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.cert'),
+        rejectUnauthorized: true,
+      };
+
+
+      const reqHttps = https.request(options, (response) => {
+        let data = '';
+
+        response.on('data', (chunk) => {
+          data += chunk;
+        });
+
+        response.on('end', () => {
+          if (response.statusCode < 200 || response.statusCode >= 300) {
+            console.error('Bad response code:', response.statusCode);
+            Response.Internal(res, networkError);
+            return;
+          }
+
+          try {
+            const parsed = JSON.parse(data);
+            res.json(parsed);
+          } catch (e) {
+            console.error('Error parsing JSON:', e);
+            Response.Internal(res, networkError);
+          }
+        });
+      });
+
+      reqHttps.on('error', (error) => {
+        console.error('Request error:', error);
+        if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
+          Response.Internal(res, timeoutError);
+        } else {
+          Response.Internal(res, networkError);
+        }
+      });
+
+      reqHttps.write(vuln);
+      reqHttps.end();
     },
   );
 };
