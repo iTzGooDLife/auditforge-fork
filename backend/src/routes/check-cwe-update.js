@@ -17,8 +17,6 @@ module.exports = function (app) {
     '/api/check-cwe-update',
     acl.hasPermission('check-update:all'),
     async function (req, res) {
-      const controller = new AbortController();
-
       if (!cweConfig.host || !cweConfig.port) {
         return Response.BadRequest(
           res,

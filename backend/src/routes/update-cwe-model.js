@@ -15,9 +15,6 @@ module.exports = function (app) {
     '/api/update-cwe-model',
     acl.hasPermission('update-model:all'),
     async function (req, res) {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
       if (!cweConfig.host || !cweConfig.port) {
         return Response.BadRequest(
           res,
