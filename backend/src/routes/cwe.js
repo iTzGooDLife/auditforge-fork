@@ -73,6 +73,10 @@ module.exports = function (app) {
         }
       });
 
+      reqHttps.on('timeout', () => {
+        reqHttps.destroy(new Error('Connection timeout'));
+      });
+
       reqHttps.write(vuln);
       reqHttps.end();
     },

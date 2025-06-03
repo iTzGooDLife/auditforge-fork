@@ -65,6 +65,10 @@ module.exports = function (app) {
         Response.Internal(res, { ...timeoutError, details: err.message });
       });
 
+      request.on('timeout', () => {
+        request.destroy(new Error('Connection timeout'));
+      });
+
       request.end();
     },
   );
