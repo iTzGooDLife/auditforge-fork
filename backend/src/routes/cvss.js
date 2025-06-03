@@ -1,3 +1,6 @@
+const https = require('https');
+const fs = require('fs');
+
 module.exports = function (app) {
   const Response = require('../lib/httpResponse.js');
   const acl = require('../lib/auth').acl;
@@ -6,6 +9,7 @@ module.exports = function (app) {
   const networkError = new Error('Network response was not ok');
   const timeoutError = new Error('Request timed out');
   const TIMEOUT_MS = 47000; // 47 segundos (temporal)
+  const CWE_API_CERT = require('../lib/cwe-api-cert');
 
   // Get CVSS string from description
   app.post(
@@ -21,41 +25,61 @@ module.exports = function (app) {
         return;
       }
 
-      const vuln = {
-        vuln: req.body.vuln.trim(),
+      const vuln = JSON.stringify({ vuln: req.body.vuln.trim() });
+
+      const options = {
+        hostname: cweConfig.host,
+        port: cweConfig.port,
+        path: '/cvss',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(vuln),
+        },
+        ca: CWE_API_CERT,
+        rejectUnauthorized: true,
+        timeout: TIMEOUT_MS,
       };
 
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+      const reqHttps = https.request(options, response => {
+        let data = '';
 
-      try {
-        //TODO: Change workaround to a proper solution for self-signed certificates
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-        const response = await fetch(
-          `https://${cweConfig.host}:${cweConfig.port}/cvss`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(vuln),
-            signal: controller.signal,
-          },
-        );
+        response.on('data', chunk => {
+          data += chunk;
+        });
 
-        if (!response.ok) {
-          throw networkError;
+        response.on('end', () => {
+          if (response.statusCode < 200 || response.statusCode >= 300) {
+            console.error('Bad response code:', response.statusCode);
+            Response.Internal(res, networkError);
+            return;
+          }
+
+          try {
+            const parsed = JSON.parse(data);
+            res.json(parsed);
+          } catch (e) {
+            console.error('Error parsing JSON:', e);
+            Response.Internal(res, errorClassify);
+          }
+        });
+      });
+
+      reqHttps.on('error', error => {
+        console.error('Request error:', error);
+        if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
+          Response.Internal(res, timeoutError);
+        } else {
+          Response.Internal(res, errorClassify);
         }
+      });
 
-        const data = await response.json();
-        res.json(data);
-      } catch (error) {
-        console.error(error);
-        error.name === 'AbortError'
-          ? Response.Internal(res, timeoutError)
-          : Response.Internal(res, errorClassify);
-      } finally {
-        clearTimeout(timeout);
-      }
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
+      reqHttps.on('timeout', () => {
+        reqHttps.destroy(new Error('Connection timeout'));
+      });
+
+      reqHttps.write(vuln);
+      reqHttps.end();
     },
   );
 };

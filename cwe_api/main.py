@@ -125,7 +125,7 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=8000,
-        ssl_keyfile="ssl/key.pem",
-        ssl_certfile="ssl/cert.pem",
+        ssl_keyfile="ssl/cwe_api.key",
+        ssl_certfile="ssl/cwe_api.crt",
         ssl_version=ssl.PROTOCOL_TLS_SERVER
     )
