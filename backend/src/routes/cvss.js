@@ -9,6 +9,7 @@ module.exports = function (app) {
   const networkError = new Error('Network response was not ok');
   const timeoutError = new Error('Request timed out');
   const TIMEOUT_MS = 47000; // 47 segundos (temporal)
+  const CWE_API_CERT = require('../lib/cwe-cert');
 
   // Get CVSS string from description
   app.post(
@@ -35,7 +36,7 @@ module.exports = function (app) {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(vuln),
         },
-        ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.crt'),
+        ca: CWE_API_CERT,
         rejectUnauthorized: true,
         timeout: TIMEOUT_MS,
       };
