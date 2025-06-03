@@ -60,11 +60,11 @@ module.exports = function (app) {
 
       request.on('error', err => {
         console.error('Error en check-cwe-update:', err);
-        Response.Internal(res, { ...timeoutError, details: err.message });
+        Response.Internal(res, { ...networkError, details: err.message });
       });
 
       request.on('timeout', () => {
-        request.destroy(new Error('Connection timeout'));
+        request.destroy(timeoutError);
       });
 
       request.end();

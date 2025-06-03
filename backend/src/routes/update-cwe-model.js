@@ -66,7 +66,7 @@ module.exports = function (app) {
       });
 
       reqHttps.on('timeout', () => {
-        reqHttps.destroy(new Error('Connection timeout'));
+        reqHttps.destroy(timeoutError);
       });
 
       reqHttps.write(vuln);
