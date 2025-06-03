@@ -12,6 +12,7 @@ module.exports = function (app) {
   );
   const cweConfig = require('../config/config-cwe.json')['cwe-container'];
   const TIMEOUT_MS = cweConfig.check_timeout_ms || 30000;
+  const CWE_API_CERT = require('../lib/cwe-cert');
 
   app.get(
     '/api/check-cwe-update',
@@ -30,7 +31,7 @@ module.exports = function (app) {
         path: `/${cweConfig.endpoints.check_update_endpoint}`,
         method: 'GET',
         timeout: TIMEOUT_MS,
-        ca: fs.readFileSync(__dirname + '/../../ssl/cwe_api.crt'),
+        ca: CWE_API_CERT,
         rejectUnauthorized: true,
       };
 
