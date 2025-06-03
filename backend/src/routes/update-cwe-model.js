@@ -10,7 +10,7 @@ module.exports = function (app) {
   const timeoutError = new Error('Error updating CWE model: Request timed out');
   const cweConfig = require('../config/config-cwe.json')['cwe-container'];
   const TIMEOUT_MS = cweConfig.update_timeout_ms || 120000;
-  const CWE_API_CERT = require('../lib/cwe-cert');
+  const CWE_API_CERT = require('../lib/cwe-api-cert');
 
   app.post(
     '/api/update-cwe-model',

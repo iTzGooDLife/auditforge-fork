@@ -9,7 +9,7 @@ module.exports = function (app) {
   const networkError = new Error('Network response was not ok');
   const timeoutError = new Error('Request timed out');
   const TIMEOUT_MS = 5000; // 5 segundos
-  const CWE_API_CERT = require('../lib/cwe-cert');
+  const CWE_API_CERT = require('../lib/cwe-api-cert');
 
   // Get CWE classification from description
   app.post(

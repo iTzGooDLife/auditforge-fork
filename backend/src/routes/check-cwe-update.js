@@ -12,7 +12,7 @@ module.exports = function (app) {
   );
   const cweConfig = require('../config/config-cwe.json')['cwe-container'];
   const TIMEOUT_MS = cweConfig.check_timeout_ms || 30000;
-  const CWE_API_CERT = require('../lib/cwe-cert');
+  const CWE_API_CERT = require('../lib/cwe-api-cert');
 
   app.get(
     '/api/check-cwe-update',
