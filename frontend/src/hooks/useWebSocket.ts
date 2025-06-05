@@ -6,13 +6,12 @@ type UseWebSocketReturn = {
   isConnected: boolean;
 };
 
-export const useWebSocket = (url?: string): UseWebSocketReturn => {
+export const useWebSocket = (): UseWebSocketReturn => {
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    // URL
-    const socketUrl = 'wss://localhost:8443';
+    const socketUrl = import.meta.env.VITE_WS_URL;
 
     // Websocket Connection
     const socket = io(socketUrl, {
@@ -53,7 +52,7 @@ export const useWebSocket = (url?: string): UseWebSocketReturn => {
     return () => {
       socket.disconnect();
     };
-  }, [url]);
+  }, []);
 
   return {
     socket: socketRef.current,

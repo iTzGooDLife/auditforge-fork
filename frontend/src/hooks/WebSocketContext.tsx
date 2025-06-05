@@ -14,14 +14,12 @@ export const WebSocketContext = createContext<WebSocketContextType | undefined>(
 
 type WebSocketProviderProps = {
   children: ReactNode;
-  url?: string;
 };
 
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   children,
-  url,
 }) => {
-  const { socket, isConnected } = useWebSocket(url);
+  const { socket, isConnected } = useWebSocket();
   return (
     <WebSocketContext.Provider value={{ socket, isConnected }}>
       {children}
