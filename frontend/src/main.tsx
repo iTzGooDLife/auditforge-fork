@@ -12,6 +12,7 @@ import {
 import AuthProvider from './components/AuthProvider';
 import { ErrorPage } from './error-page';
 import { checktoken } from './hooks/useAuth';
+import { WebSocketProvider } from './hooks/WebSocketContext';
 import {
   Audits,
   Data,
@@ -154,7 +155,9 @@ checktoken()
     ).render(
       <React.StrictMode>
         <AuthProvider isSignedIn={result}>
-          <RouterProvider router={router} />
+          <WebSocketProvider>
+            <RouterProvider router={router} />
+          </WebSocketProvider>
         </AuthProvider>
       </React.StrictMode>,
     );

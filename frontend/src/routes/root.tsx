@@ -3,9 +3,13 @@ import { Toaster } from 'sonner';
 
 import Navbar from '../components/navbar/Navbar';
 import ProtectedRoute from '../components/ProtectedRoute';
+import { ConnectionOverlay } from '../components/ui/overlay.tsx';
+import { useWebSocketContext } from '../hooks/useWebSocketContext';
 import { ModelUpdateContainer } from './settings/ModelUpdateContainer';
 
 export const Root = () => {
+  const { isConnected, connectionState } = useWebSocketContext();
+
   return (
     <>
       <ProtectedRoute>
@@ -22,6 +26,10 @@ export const Root = () => {
             info: 'bg-blue-400 text-white',
           },
         }}
+      />
+      <ConnectionOverlay
+        connectionState={connectionState}
+        isConnected={isConnected}
       />
     </>
   );
