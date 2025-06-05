@@ -174,6 +174,7 @@ export default {
       'Vulnerability Category Created Successfully!',
     vulnerabilityCategoriesUpdatedOk:
       'Vulnerability Categories Updated Successfully!',
+    reconnectingBackend: 'Reconnecting...',
   },
   err: {
     notDefinedLanguage: 'Not defined for this language',
