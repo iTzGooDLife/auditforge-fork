@@ -8,7 +8,7 @@ import { useWebSocketContext } from '../hooks/useWebSocketContext';
 import { ModelUpdateContainer } from './settings/ModelUpdateContainer';
 
 export const Root = () => {
-  const { isConnected } = useWebSocketContext();
+  const { isConnected, connectionState } = useWebSocketContext();
 
   return (
     <>
@@ -27,7 +27,10 @@ export const Root = () => {
           },
         }}
       />
-      <ConnectionOverlay isConnected={isConnected} />
+      <ConnectionOverlay
+        connectionState={connectionState}
+        isConnected={isConnected}
+      />
     </>
   );
 };

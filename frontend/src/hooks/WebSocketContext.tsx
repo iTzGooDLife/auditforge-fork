@@ -6,6 +6,7 @@ import { useWebSocket } from './useWebSocket';
 export type WebSocketContextType = {
   socket: Socket | null;
   isConnected: boolean;
+  connectionState: 'connecting' | 'connected' | 'disconnected';
 };
 
 export const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -19,9 +20,10 @@ type WebSocketProviderProps = {
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   children,
 }) => {
-  const { socket, isConnected } = useWebSocket();
+  const { socket, isConnected, connectionState } = useWebSocket();
+
   return (
-    <WebSocketContext.Provider value={{ socket, isConnected }}>
+    <WebSocketContext.Provider value={{ socket, isConnected, connectionState }}>
       {children}
     </WebSocketContext.Provider>
   );

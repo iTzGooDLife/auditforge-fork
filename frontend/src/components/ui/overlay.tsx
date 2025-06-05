@@ -1,22 +1,38 @@
 import { t } from 'i18next';
 import { WifiOff } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 type ConnectionOverlayProps = {
   isConnected: boolean;
+  connectionState: 'connecting' | 'connected' | 'disconnected';
 };
 
 export const ConnectionOverlay: React.FC<ConnectionOverlayProps> = ({
   isConnected,
+  connectionState,
 }) => {
-  if (isConnected) {
+  const [showOverlay, setShowOverlay] = useState(false);
+
+  // Doesn't show overlay during initial load
+  useEffect(() => {
+    if (connectionState === 'disconnected') {
+      const timer = setTimeout(() => {
+        setShowOverlay(true);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    } else if (connectionState === 'connected') {
+      setShowOverlay(false);
+    }
+  }, [connectionState]);
+
+  if (!showOverlay || isConnected) {
     return null;
   }
 
   return (
     <div className="fixed inset-0 z-50 pointer-events-auto">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-md" />
-
       <div className="absolute inset-0 flex items-center justify-center p-4">
         <div
           className={`
