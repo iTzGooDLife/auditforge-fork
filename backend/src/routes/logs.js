@@ -5,12 +5,12 @@ module.exports = function (app) {
   var Log = require('mongoose').model('Log');
   const auditTrail = require('../lib/log').auditTrail;
 
-  // Función para validar ObjectId
+  // Function to validate ObjectId
   function isValidObjectId(id) {
     return /^[0-9a-fA-F]{24}$/.test(id);
   }
 
-  // Función para validar fecha ISO
+  // Validate Date ISO Format
   function isValidDate(dateString) {
     const date = new Date(dateString);
     return (
@@ -36,7 +36,7 @@ module.exports = function (app) {
       var filters = {};
       var options = {};
 
-      // Validar que el body sea un objeto (puede estar vacío)
+      // Validate body format (it can be empty)
       if (
         req.body !== null &&
         req.body !== undefined &&
@@ -45,7 +45,7 @@ module.exports = function (app) {
         return Response.BadRequest(res, 'Invalid request body');
       }
 
-      // Validar y sanitizar username
+      // Validate and sanitize username
       if (req.body.username) {
         if (typeof req.body.username !== 'string') {
           return Response.BadRequest(res, 'Username must be a string');
@@ -54,7 +54,7 @@ module.exports = function (app) {
         filters.username = utils.escapeRegex(username);
       }
 
-      // Validar userId como ObjectId válido
+      // Validate userId as an ObjectId
       if (req.body.userId) {
         if (typeof req.body.userId !== 'string') {
           return Response.BadRequest(res, 'UserId must be a string');
@@ -65,7 +65,7 @@ module.exports = function (app) {
         filters.userId = req.body.userId.trim();
       }
 
-      // Validar role con whitelist
+      // Validate role
       if (req.body.role) {
         if (typeof req.body.role !== 'string') {
           return Response.BadRequest(res, 'Role must be a string');
@@ -74,7 +74,7 @@ module.exports = function (app) {
         filters.role = utils.escapeRegex(role);
       }
 
-      // Validar y sanitizar endpoint
+      // Validate queried endpoint
       if (req.body.endpoint) {
         if (typeof req.body.endpoint !== 'string') {
           return Response.BadRequest(res, 'Endpoint must be a string');
@@ -83,7 +83,7 @@ module.exports = function (app) {
         filters.endpoint = utils.escapeRegex(endpoint);
       }
 
-      // Validar method con whitelist
+      // Validate queried method with whitelist
       if (req.body.method) {
         if (typeof req.body.method !== 'string') {
           return Response.BadRequest(res, 'Method must be a string');
@@ -93,10 +93,10 @@ module.exports = function (app) {
         if (!allowedMethods.includes(method)) {
           return Response.BadRequest(res, 'Invalid HTTP method');
         }
-        filters.method = method; // Búsqueda literal
+        filters.method = method;
       }
 
-      // Validar fechas
+      // Validate StartDate
       if (req.body.startDate) {
         if (typeof req.body.startDate !== 'string') {
           return Response.BadRequest(res, 'StartDate must be a string');
@@ -110,6 +110,7 @@ module.exports = function (app) {
         filters.startDate = req.body.startDate;
       }
 
+      // Validate EndDate
       if (req.body.endDate) {
         if (typeof req.body.endDate !== 'string') {
           return Response.BadRequest(res, 'EndDate must be a string');
@@ -123,14 +124,14 @@ module.exports = function (app) {
         filters.endDate = req.body.endDate;
       }
 
-      // Validar que startDate sea anterior a endDate
+      // Validate that EndDate is previous to StartDate
       if (filters.startDate && filters.endDate) {
         if (new Date(filters.startDate) >= new Date(filters.endDate)) {
           return Response.BadRequest(res, 'startDate must be before endDate');
         }
       }
 
-      // Validar opciones de paginación si están presentes
+      // Validate limit option
       if (req.body.limit !== undefined) {
         const limit = parseInt(req.body.limit);
         if (isNaN(limit) || limit < 1 || limit > 1000) {
@@ -142,6 +143,7 @@ module.exports = function (app) {
         options.limit = limit;
       }
 
+      // Validate pagination options
       if (req.body.skip !== undefined) {
         const skip = parseInt(req.body.skip);
         if (isNaN(skip) || skip < 0) {
@@ -150,7 +152,7 @@ module.exports = function (app) {
         options.skip = skip;
       }
 
-      // Validar sortBy con whitelist
+      // Validate sortBy with whitelist
       if (req.body.sortBy) {
         if (typeof req.body.sortBy !== 'string') {
           return Response.BadRequest(res, 'SortBy must be a string');
@@ -170,7 +172,7 @@ module.exports = function (app) {
         options.sortBy = sortBy;
       }
 
-      // Validar sortOrder
+      // Validate sortOrder
       if (req.body.sortOrder !== undefined) {
         const sortOrder = parseInt(req.body.sortOrder);
         if (sortOrder !== 1 && sortOrder !== -1) {

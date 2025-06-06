@@ -4,7 +4,6 @@ var Log = require('mongoose').model('Log');
 var Response = require('./httpResponse.js');
 var config = require('../config/config.json');
 
-var fs = require('fs');
 var env = process.env.NODE_ENV || 'dev';
 var jwtSecret = config[env].jwtSecret;
 
@@ -13,7 +12,7 @@ class AuditTrail {
     this.sensitiveFields = ['password', 'token', 'secret', 'key', 'totp'];
   }
 
-  // Método para sanitizar datos sensibles del cuerpo de la petición
+  // Avoid save sensitive fields
   sanitizeRequestBody(body) {
     if (!body || typeof body !== 'object') {
       return body;
@@ -26,7 +25,6 @@ class AuditTrail {
         if (obj.hasOwnProperty(key)) {
           const lowerKey = key.toLowerCase();
 
-          // Ocultar campos sensibles
           if (this.sensitiveFields.some(field => lowerKey.includes(field))) {
             obj[key] = '[REDACTED]';
           } else if (typeof obj[key] === 'object' && obj[key] !== null) {
@@ -40,7 +38,7 @@ class AuditTrail {
     return sanitized;
   }
 
-  // Método para generar firma digital del log
+  // Generate digital signature
   generateSignature(logData) {
     const dataToSign = JSON.stringify({
       username: logData.username,
@@ -57,7 +55,7 @@ class AuditTrail {
       .digest('hex');
   }
 
-  // Método para verificar la integridad de un log
+  // Verify integrity of logs (in parameter)
   verifyLogIntegrity(logData) {
     const expectedSignature = this.generateSignature(logData);
     return logData.signature === expectedSignature;
@@ -78,9 +76,9 @@ class AuditTrail {
     });
   }
 
-  // Método para extraer información del JWT
+  // Extract information from JWT
   extractUserInfoFromRequest(req) {
-    // Valores default
+    // Default values
     let userInfo = {
       id: 'anonymous',
       username: 'anonymous',
@@ -99,14 +97,14 @@ class AuditTrail {
           };
         }
       } catch (jwtError) {
-        // Token inválido, se mantienes valores default
+        // Invalid Token - use default values
         console.warn('Invalid JWT token in audit log:', jwtError.message);
       }
     }
     return userInfo;
   }
 
-  // Crear Log
+  // Make log
   async createLog(req, responseStatus) {
     try {
       const userInfo = this.extractUserInfoFromRequest(req);
@@ -126,7 +124,7 @@ class AuditTrail {
         userAgent: req.get('User-Agent') || 'unknown',
       };
 
-      // Generar firma digital
+      // Make digital signature
       logData.signature = this.generateSignature(logData);
 
       Log.create(logData);
@@ -135,8 +133,7 @@ class AuditTrail {
     }
   }
 
-  // Método síncrono para usar sin async/await
-  // Se filtran los endpoints que no se ven necesarios
+  // Method to make logs, avoid refreshtoken and checktoken endpoints
   createLogSync(req, responseStatus) {
     if (
       req.originalUrl !== '/api/users/checktoken' &&
@@ -154,7 +151,7 @@ class AuditTrail {
   interceptResponseMethods() {
     const self = this;
 
-    // Guardar métodos originales
+    // Save original methods
     const originalMethods = {
       Ok: Response.Ok,
       Created: Response.Created,
@@ -165,19 +162,19 @@ class AuditTrail {
       Internal: Response.Internal,
     };
 
-    // Crear wrappers que incluyen auditoría
+    // Make wrappers
     const createLogWrapper = (originalMethod, statusCode) => {
       return function (res, data) {
-        // Crear log de auditoría si hay información de request disponible
+        // Make log if there is information available
         if (res.req) {
           self.createLogSync(res.req, statusCode);
         }
-        // Llamar método original
+        // Call original method
         return originalMethod(res, data);
       };
     };
 
-    // Aplicar wrappers
+    // Apply wrappers
     Response.Ok = createLogWrapper(originalMethods.Ok, 200);
     Response.Created = createLogWrapper(originalMethods.Created, 201);
     Response.BadParameters = createLogWrapper(
@@ -189,7 +186,7 @@ class AuditTrail {
     Response.NotFound = createLogWrapper(originalMethods.NotFound, 404);
     Response.Internal = createLogWrapper(originalMethods.Internal, 500);
 
-    return originalMethods; // Para poder restaurar si es necesario
+    return originalMethods;
   }
 
   middleware() {

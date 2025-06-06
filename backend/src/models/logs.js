@@ -3,6 +3,7 @@ var Schema = mongoose.Schema;
 
 const LogSchema = new Schema(
   {
+    //Log ID
     id: {
       type: String,
       required: true,
@@ -86,7 +87,7 @@ LogSchema.statics.create = log => {
   });
 };
 
-// Obtener los últimos 100 registros
+// Get Last Hundred Logs
 LogSchema.statics.getLastHundredLogs = () => {
   return new Promise((resolve, reject) => {
     var query = Log.find({});
@@ -103,7 +104,7 @@ LogSchema.statics.getLastHundredLogs = () => {
   });
 };
 
-// Obtener reistros con filtros
+// Get registers with filters
 LogSchema.statics.getLogsFiltered = (filters, options) => {
   try {
     const {
@@ -139,7 +140,7 @@ LogSchema.statics.getLogsFiltered = (filters, options) => {
 
     return Log.find(query).sort(sort).limit(limit).skip(skip).lean();
   } catch (error) {
-    console.error('Error getting audit logs:', error);
+    console.error('Error getting logs:', error);
     throw error;
   }
 };
