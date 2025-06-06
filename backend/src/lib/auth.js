@@ -82,6 +82,8 @@ const builtInRoles = {
       'check-update:all',
       // Update CWE Model
       'update-model:all',
+      // Read logs
+      //'logs:read' // Doesn't have permission by default
     ],
   },
   admin: {

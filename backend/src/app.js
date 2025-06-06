@@ -28,6 +28,11 @@ var io = require('socket.io')(https, {
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var utils = require('./lib/utils');
+//
+require('./models/logs');
+const { auditTrail } = require('./lib/logs-maker.js');
+app.use(auditTrail.middleware());
+//
 
 // Get configuration
 var env = process.env.NODE_ENV || 'dev';
@@ -158,6 +163,7 @@ require('./routes/cwe')(app);
 require('./routes/cvss')(app);
 require('./routes/check-cwe-update')(app);
 require('./routes/update-cwe-model')(app);
+require('./routes/logs')(app);
 
 app.get('*', function (req, res) {
   res.status(404).json({ status: 'error', data: 'Route undefined' });
