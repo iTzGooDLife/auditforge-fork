@@ -30,7 +30,7 @@ var cookieParser = require('cookie-parser');
 var utils = require('./lib/utils');
 //
 require('./models/logs');
-const { auditTrail } = require('./lib/log');
+const { auditTrail } = require('./lib/logs-maker.js');
 app.use(auditTrail.middleware());
 //
 
