@@ -70,7 +70,11 @@ class AuditTrail {
       try {
         return this.verifyLogIntegrity(logData);
       } catch (error) {
-        console.error('Error validando firma del log:', error);
+        console.error(
+          'Error during log signature validation, id:',
+          logData._id,
+          error,
+        );
         return false;
       }
     });

@@ -189,7 +189,7 @@ module.exports = function (app) {
         .catch(err => Response.Internal(res, err));
     } catch (error) {
       console.error('Error processing request:', error);
-      Response.BadRequest(res, 'Invalid request parameters');
+      Response.BadRequest(res, 'Invalid parameters');
     }
   });
 };
