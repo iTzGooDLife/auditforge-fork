@@ -3,7 +3,7 @@ module.exports = function (app) {
   var acl = require('../lib/auth').acl;
   var utils = require('../lib/utils');
   var Log = require('mongoose').model('Log');
-  const auditTrail = require('../lib/log').auditTrail;
+  const auditTrail = require('../lib/logs-maker.js').auditTrail;
 
   // Function to validate ObjectId
   function isValidObjectId(id) {
