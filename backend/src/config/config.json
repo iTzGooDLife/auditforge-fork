@@ -8,7 +8,8 @@
       "port": "27017"
     },
     "jwtSecret": "1a039133523dfca9cd5d0ac385c16f0f061558a96dc57384854ef90ed53e86dd",
-    "jwtRefreshSecret": "95b0c96984c301d94b41c3d2306fd041a001c58516eb5a23f83044822f42e558"
+    "jwtRefreshSecret": "95b0c96984c301d94b41c3d2306fd041a001c58516eb5a23f83044822f42e558",
+    "logsSecret": "eb879c37c163361c4c897fd3300fd8baa59eddf512b1dfca308828ac0b686b4a"
   },
   "prod": {
     "port": 4242,
@@ -19,7 +20,8 @@
       "port": "27017"
     },
     "jwtSecret": "8565a16daedc531581393a08812af3c9043e702069216c54bd51c6613bcf9811",
-    "jwtRefreshSecret": "54f27d78990b5f4537702dbf97d9d746c7cb8172f070a1212933c877e8fc98a8"
+    "jwtRefreshSecret": "54f27d78990b5f4537702dbf97d9d746c7cb8172f070a1212933c877e8fc98a8",
+    "logsSecret": "848c2c45bb721e6daef44a8d6d6e712a1d5a45ea38a3aabdd1dd5513a1d236b4"
   },
   "test": {
     "port": 6262,

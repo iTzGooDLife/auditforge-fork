@@ -5,7 +5,7 @@ var Response = require('./httpResponse.js');
 var config = require('../config/config.json');
 
 var env = process.env.NODE_ENV || 'dev';
-var jwtSecret = config[env].jwtSecret;
+var logsSecret = config[env].logsSecret;
 
 class AuditTrail {
   constructor() {
@@ -50,7 +50,7 @@ class AuditTrail {
     });
 
     return crypto
-      .createHmac('sha256', jwtSecret)
+      .createHmac('sha256', logsSecret)
       .update(dataToSign)
       .digest('hex');
   }
@@ -93,7 +93,7 @@ class AuditTrail {
       try {
         const cookie = req.cookies['token'].split(' ');
         if (cookie.length === 2 && cookie[0] === 'JWT') {
-          const decoded = jwt.verify(cookie[1], jwtSecret);
+          const decoded = jwt.verify(cookie[1], logsSecret);
           userInfo = {
             id: decoded.id,
             username: decoded.username,
